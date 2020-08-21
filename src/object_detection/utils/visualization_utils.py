@@ -1080,6 +1080,7 @@ def draw_float_channel_on_image_array(image, channel, mask, alpha=0.9,
   pil_image = Image.composite(pil_colored_channel, pil_image, pil_mask)
   np.copyto(image, np.array(pil_image.convert('RGB')))
 
+SPORTS_BALL_ID = 37
 
 def visualize_boxes_and_labels_on_image_array(
     image,
@@ -1167,6 +1168,8 @@ def visualize_boxes_and_labels_on_image_array(
   for i in range(boxes.shape[0]):
     if max_boxes_to_draw == len(box_to_color_map):
       break
+    if classes[i] != SPORTS_BALL_ID:
+      continue
     if scores is None or scores[i] > min_score_thresh:
       box = tuple(boxes[i].tolist())
       if instance_masks is not None:
