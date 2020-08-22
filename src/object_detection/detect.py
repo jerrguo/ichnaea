@@ -11,7 +11,7 @@ NUM_CLASSES = 90
 
 HOME_PATH = pathlib.Path(__file__).parent.absolute().as_posix()
 
-# What model to download.
+# What model to use.
 MODEL_NAME = 'ssd_mobilenet_v1_ppn_shared_box_predictor_300x300_coco14_sync_2018_07_03'
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
@@ -21,10 +21,16 @@ PATH_TO_CKPT = os.path.join(HOME_PATH, MODEL_NAME, 'frozen_inference_graph.pb')
 PATH_TO_LABELS = os.path.join(HOME_PATH, 'data', 'mscoco_label_map.pbtxt')
 
 # Path to video for testing purposes
-PATH_TO_VIDEO = os.path.join(HOME_PATH, '../../videos/test.mp4')
+PATH_TO_TEST_VIDEOS = os.path.join(HOME_PATH, '../test_videos')
+PATH_TO_VIDEO = os.path.join(PATH_TO_TEST_VIDEOS, 'test1.mp4')
 
 # Initialize OpenCV capture
-cap = cv2.VideoCapture(PATH_TO_VIDEO)
+capture_index = PATH_TO_VIDEO
+cap = cv2.VideoCapture(capture_index)
+if not cap.isOpened():
+    cap.open(capture_index)
+    if not cap.isOpened():
+        raise IOError('OpenCV capture cannot be opened.')
 
 # Load a (frozen) Tensorflow model into memory.
 detection_graph = tf.Graph()
@@ -82,7 +88,7 @@ with detection_graph.as_default():
                 use_normalized_coordinates=True,
                 line_thickness=8)
 
-            cv2.imshow('test', cv2.resize(image_np, (800, 600)))
-            if cv2.waitKey(25) & 0xFF == ord('q'):
+            cv2.imshow('test', image_np)
+            if cv2.waitKey(5) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
                 break
