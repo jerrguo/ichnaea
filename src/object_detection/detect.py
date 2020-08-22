@@ -96,5 +96,7 @@ if __name__ == '__main__':
                 detect_objects(image_np, visualize=True)
                 cv2.imshow('test', image_np)
                 if cv2.waitKey(5) & 0xFF == ord('q'):
-                    cv2.destroyAllWindows()
                     break
+
+    cap.release()
+    cv2.destroyAllWindows()

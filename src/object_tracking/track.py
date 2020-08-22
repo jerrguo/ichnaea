@@ -1,7 +1,8 @@
+import os
+import pathlib
 import imutils
 import time
 import cv2
-from imutils.video import VideoStream
 from imutils.video import FPS
 
 # Path to video for testing purposes
@@ -27,16 +28,51 @@ OPENCV_OBJECT_TRACKERS = {
     "mosse": cv2.TrackerMOSSE_create
 }
 
-# Initialize the tracker
-tracker = OPENCV_OBJECT_TRACKERS['kcf']()
 # Initialize bounding box of tracked object
-initBB = None
+BB = None
 # Initialize FPS estimator
 fps = None
 
-while True:
-    ret, image_np = cap.read()
-    image_np = imutils.resize(image_np, width=500)
-    (H, W) = image_np.shape[:2]
-    
-    
+if __name__ == '__main__':
+    while True:
+        ret, image_np = cap.read()
+        # image_np = imutils.resize(image_np, width=500)
+        (H, W) = image_np.shape[:2]
+        
+        if BB is not None:
+            # Grab the new bounding box coordinates of the object
+            (success, box) = tracker.update(image_np)
+            # Check to see if the tracking was a success
+            if success:
+                (x, y, w, h) = [int(v) for v in box]
+                cv2.rectangle(image_np, (x, y), (x + w, y + h),
+                    (0, 255, 0), 2)
+            # Update the FPS counter
+            fps.update()
+            fps.stop()
+            # Initialize the set of information we'll be displaying on the frame
+            info = [
+                ("Tracker", 'KCF'),
+                ("Success", "Yes" if success else "No"),
+                ("FPS", "{:.2f}".format(fps.fps())),
+            ]
+            # Loop over the info tuples and draw them on our frame
+            for (i, (k, v)) in enumerate(info):
+                text = "{}: {}".format(k, v)
+                cv2.putText(image_np, text, (10, H - ((i * 20) + 20)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        
+        # Show the output frame
+        cv2.imshow("Frame", image_np)
+
+        if cv2.waitKey(25) & 0xFF == ord("s"):
+            # Select the bounding box of an object
+            BB = cv2.selectROI("Frame", image_np, fromCenter=False,
+                showCrosshair=True)
+            # Initialize the tracker
+            tracker = OPENCV_OBJECT_TRACKERS['csrt']()
+            tracker.init(image_np, BB)
+            fps = FPS().start()
+        
+    cap.release()
+    cv2.destroyAllWindows()
