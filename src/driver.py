@@ -1,6 +1,9 @@
 import os
 import pathlib
 import cv2
+import tensorflow as tf
+
+from object_detection.detect import ObjectDetector
 
 # Path to video for testing purposes
 HOME_PATH = pathlib.Path(__file__).parent.absolute().as_posix()
@@ -15,11 +18,26 @@ if __name__ == '__main__':
         cap.open(capture_index)
         if not cap.isOpened():
             raise IOError('OpenCV capture cannot be opened.')
+
+    # Initialize object detector and tracker
+    detector = ObjectDetector()
     
     # Read the capture
     BB = None
-    while True:
-        ret, image_np = cap.read()
-        # If there is no bounding box, run the detection algorithm
-        pass
-        # If the bounding box exists, track the object
+    with detector.detection_graph.as_default():
+        with tf.compat.v1.Session(graph=detector.detection_graph) as sess:
+            while True:
+                ret, image_np = cap.read()
+                # If there is no bounding box, run the detection algorithm, otherwise track
+                if not BB:
+                    boxes, scores, classes, num_detections = detector.detect_objects(sess, image_np)
+                    # print(boxes)
+                    # print(scores)
+                    # print(classes)
+                    # print(num_detections)
+                    # TODO: Set bounding box used for tracking
+                else:
+                    pass
+            
+    cap.release()
+    cv2.destroyAllWindows()

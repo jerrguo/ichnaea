@@ -5,19 +5,6 @@ import time
 import cv2
 from imutils.video import FPS
 
-# Path to video for testing purposes
-HOME_PATH = pathlib.Path(__file__).parent.absolute().as_posix()
-PATH_TO_TEST_VIDEOS = os.path.join(HOME_PATH, '../test_videos')
-PATH_TO_VIDEO = os.path.join(PATH_TO_TEST_VIDEOS, 'test1.mp4')
-
-# Initialize OpenCV capture
-capture_index = PATH_TO_VIDEO
-cap = cv2.VideoCapture(capture_index)
-if not cap.isOpened():
-    cap.open(capture_index)
-    if not cap.isOpened():
-        raise IOError('OpenCV capture cannot be opened.')
-
 OPENCV_OBJECT_TRACKERS = {
     "csrt": cv2.TrackerCSRT_create,
     "kcf": cv2.TrackerKCF_create,
@@ -34,6 +21,19 @@ BB = None
 fps = None
 
 if __name__ == '__main__':
+    # Path to video for testing purposes
+    HOME_PATH = pathlib.Path(__file__).parent.absolute().as_posix()
+    PATH_TO_TEST_VIDEOS = os.path.join(HOME_PATH, '../test_videos')
+    PATH_TO_VIDEO = os.path.join(PATH_TO_TEST_VIDEOS, 'test1.mp4')
+
+    # Initialize OpenCV capture
+    capture_index = PATH_TO_VIDEO
+    cap = cv2.VideoCapture(capture_index)
+    if not cap.isOpened():
+        cap.open(capture_index)
+        if not cap.isOpened():
+            raise IOError('OpenCV capture cannot be opened.')
+
     while True:
         ret, image_np = cap.read()
         # image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2HSV)
