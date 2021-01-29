@@ -25,7 +25,7 @@ OPENCV_OBJECT_TRACKERS = {
     "mil": cv2.TrackerMIL_create,
     "tld": cv2.TrackerTLD_create,
     "medianflow": cv2.TrackerMedianFlow_create,
-    "mosse": cv2.TrackerMOSSE_create
+    "mosse": cv2.TrackerMOSSE_create,
 }
 
 # Initialize bounding box of tracked object
@@ -36,6 +36,7 @@ fps = None
 if __name__ == '__main__':
     while True:
         ret, image_np = cap.read()
+        # image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2HSV)
         # image_np = imutils.resize(image_np, width=500)
         (H, W) = image_np.shape[:2]
         
@@ -66,11 +67,12 @@ if __name__ == '__main__':
         cv2.imshow("Frame", image_np)
 
         if cv2.waitKey(25) & 0xFF == ord("s"):
-            # Select the bounding box of an object
+            # Select the bounding box of an object (x, y, width, height)
             BB = cv2.selectROI("Frame", image_np, fromCenter=False,
                 showCrosshair=True)
+            print(BB)
             # Initialize the tracker
-            tracker = OPENCV_OBJECT_TRACKERS['csrt']()
+            tracker = OPENCV_OBJECT_TRACKERS['mil']()
             tracker.init(image_np, BB)
             fps = FPS().start()
         

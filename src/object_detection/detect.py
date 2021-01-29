@@ -8,6 +8,8 @@ from utils import visualization_utils as vis_util
 from utils import label_map_util
 
 NUM_CLASSES = 90
+PERSON_ID = 1
+SPORTS_BALL_ID = 37
 
 HOME_PATH = pathlib.Path(__file__).parent.absolute().as_posix()
 
@@ -83,7 +85,8 @@ def detect_objects(image_np, visualize=False):
             np.squeeze(scores),
             category_index,
             use_normalized_coordinates=True,
-            line_thickness=8)
+            line_thickness=8,
+            whitelist_classes=[PERSON_ID, SPORTS_BALL_ID])
     
     return boxes, scores, classes, num_detections
 
