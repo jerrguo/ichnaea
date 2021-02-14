@@ -57,7 +57,7 @@ class ObjectTracker:
             cv2.putText(image, text, (10, H - ((i * 20) + 20)),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
-        return image
+        return image, success
 
 if __name__ == "__main__":
 
@@ -80,11 +80,12 @@ if __name__ == "__main__":
     while True:
         ret, image = cap.read()
         if bounding_box is not None:
-            image = object_tracker.track(bounding_box, image)
+            image, _ = object_tracker.track(bounding_box, image)
         if cv2.waitKey(25) & 0xFF == ord("s"):
             # Select the bounding box of an object (x, y, width, height)
             bounding_box = cv2.selectROI("Frame", image, fromCenter=False,
             showCrosshair=True)
+            print(bounding_box, type(bounding_box))
             object_tracker.start_tracker(bounding_box, image)
         # Show the output frame
         cv2.imshow("Frame", image)

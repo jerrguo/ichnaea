@@ -29,18 +29,30 @@ if __name__ == '__main__':
     with detector.detection_graph.as_default():
         with tf.compat.v1.Session(graph=detector.detection_graph) as sess:
             while True:
-                print("new image...")
                 ret, image_np = cap.read()
                 # If there is no bounding box, run the detection algorithm, otherwise track
                 if not BB:
                     boxes, scores, classes, num_detections = detector.detect_objects(sess, image_np)
-                    # TODO: Set bounding box used for tracking
-                    BB = boxes[0][0]
+                    # TODO: Set bounding box used for tracking, scale BB correctly
+                    
+                    # print(len(boxes[0]), len(scores), len(classes), len(num_detections))
+                    # BB = boxes[0][0]
+                    # im_height, im_width, _ = image_np.shape
+                    # ymin, xmin, ymax, xmax = BB
+                    # BB = (int(xmin * im_width), int(xmax * im_width),
+                    #                                 int(ymin * im_height), int(ymax * im_height))
+
+                    # print(BB, type(BB))
+                    BB = (605, 373, 62, 45)
                     tracker.start_tracker(BB, image_np)
+
                 else:
-                    image_np = tracker.keep_tracking(BB, image_np)
+                    image_np, success = tracker.track(BB, image_np)
+                    if not success: BB = None
                 
                 cv2.imshow("Frame", image_np)
+                if cv2.waitKey(5) & 0xFF == ord('q'):
+                    break
             
     cap.release()
     cv2.destroyAllWindows()
