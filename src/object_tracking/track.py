@@ -7,20 +7,18 @@ from imutils.video import FPS
 
 OPENCV_OBJECT_TRACKERS = {
     "csrt": cv2.TrackerCSRT_create,
-    # "kcf": cv2.TrackerKCF_create,
+    "kcf": cv2.TrackerKCF_create,
     "boosting": cv2.TrackerBoosting_create,
     "mil": cv2.TrackerMIL_create,
-    # "tld": cv2.TrackerTLD_create,
+    "tld": cv2.TrackerTLD_create,
     "medianflow": cv2.TrackerMedianFlow_create,
-    # "mosse": cv2.TrackerMOSSE_create,
+    "mosse": cv2.TrackerMOSSE_create,
 }
 
 # Initialize bounding box of tracked object
 BB = None
 # Initialize FPS estimator
 fps = None
-
-TRACKER_NAME = "tld"
 
 if __name__ == '__main__':
     # Path to video for testing purposes
@@ -55,7 +53,7 @@ if __name__ == '__main__':
             fps.stop()
             # Initialize the set of information we'll be displaying on the frame
             info = [
-                ("Tracker", TRACKER_NAME),
+                ("Tracker", 'KCF'),
                 ("Success", "Yes" if success else "No"),
                 ("FPS", "{:.2f}".format(fps.fps())),
             ]
@@ -74,7 +72,7 @@ if __name__ == '__main__':
                 showCrosshair=True)
             print(BB)
             # Initialize the tracker
-            tracker = OPENCV_OBJECT_TRACKERS[TRACKER_NAME]()
+            tracker = OPENCV_OBJECT_TRACKERS['mil']()
             tracker.init(image_np, BB)
             fps = FPS().start()
         
