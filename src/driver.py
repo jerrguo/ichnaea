@@ -19,6 +19,10 @@ if __name__ == '__main__':
         cap.open(capture_index)
         if not cap.isOpened():
             raise IOError('OpenCV capture cannot be opened.')
+    
+    CAP_WIDTH = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    CAP_HEIGHT = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    # CAP_FPS =  cap.get(cv2.CAP_PROP_FPS)
 
     # Initialize object detector and tracker
     detector = ObjectDetector()
@@ -33,22 +37,24 @@ if __name__ == '__main__':
                 # If there is no bounding box, run the detection algorithm, otherwise track
                 if not BB:
                     boxes, scores, classes, num_detections = detector.detect_objects(sess, image_np)
-                    # TODO: Set bounding box used for tracking, scale BB correctly
-                    
-                    # print(len(boxes[0]), len(scores), len(classes), len(num_detections))
-                    # BB = boxes[0][0]
-                    # im_height, im_width, _ = image_np.shape
-                    # ymin, xmin, ymax, xmax = BB
-                    # BB = (int(xmin * im_width), int(xmax * im_width),
-                    #                                 int(ymin * im_height), int(ymax * im_height))
+                    if boxes.size != 0:
+                        # The first box is the one with highest score
+                        box = boxes[0]
 
-                    # print(BB, type(BB))
-                    BB = (605, 373, 62, 45)
-                    tracker.start_tracker(BB, image_np)
-
+                        ymin, xmin, ymax, xmax = box
+                        box_width = xmax - xmin
+                        box_height = ymax - ymin
+                        BB = (
+                            int(xmin * CAP_WIDTH),
+                            int(ymin * CAP_HEIGHT),
+                            int(box_width * CAP_WIDTH),
+                            int(box_height * CAP_HEIGHT)
+                        )
+                        tracker.start_tracker(BB, image_np)
                 else:
                     image_np, success = tracker.track(BB, image_np)
-                    if not success: BB = None
+                    if not success:
+                        BB = None
                 
                 cv2.imshow("Frame", image_np)
                 if cv2.waitKey(5) & 0xFF == ord('q'):

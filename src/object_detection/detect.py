@@ -61,25 +61,36 @@ class ObjectDetector:
         # Score is shown on the result image, together with the class label.
         scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
         classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
-        num_detections = self.detection_graph.get_tensor_by_name(
-            'num_detections:0')
+        num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
 
         # Actual detection.
         (boxes, scores, classes, num_detections) = session.run(
             [boxes, scores, classes, num_detections],
             feed_dict={image_tensor: image_np_expanded})
+        
+        # Format boxes, scores, and classes
+        boxes = np.squeeze(boxes)
+        scores = np.squeeze(scores)
+        classes = np.squeeze(classes).astype(np.int32)
+
+        # Build indeces filters
+        indices = np.argwhere(classes == SPORTS_BALL_ID)
+
+        # Filter accordingly
+        boxes = np.squeeze(boxes[indices], axis=1)
+        scores = np.squeeze(scores[indices], axis=1)
+        classes = np.squeeze(classes[indices], axis=1)
 
         # Visualization of the results of a detection.
         if visualize:
             vis_util.visualize_boxes_and_labels_on_image_array(
                 image_np,
-                np.squeeze(boxes),
-                np.squeeze(classes).astype(np.int32),
-                np.squeeze(scores),
+                boxes,
+                classes,
+                scores,
                 self.category_index,
                 use_normalized_coordinates=True,
-                line_thickness=8,
-                whitelist_classes=[PERSON_ID, SPORTS_BALL_ID])
+                line_thickness=4)
         
         return boxes, scores, classes, num_detections
 

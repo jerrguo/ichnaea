@@ -18,15 +18,13 @@ OPENCV_OBJECT_TRACKERS = {
 
 class ObjectTracker:
 
-    def __init__(self, model_name="mil"):
+    def __init__(self, model_name="kcf"):
+        self.tracker = None
         self.model_name = model_name
 
-    def _set_tracker(self):
-        self.tracker = OPENCV_OBJECT_TRACKERS[self.model_name]()
-
-
     def start_tracker(self, bounding_box, image):
-        self._set_tracker()
+        print("Starting tracker for bounding box:", bounding_box)
+        self.tracker = OPENCV_OBJECT_TRACKERS[self.model_name]()
         self.tracker.init(image, bounding_box)
         self.fps = FPS().start()
 
@@ -34,6 +32,8 @@ class ObjectTracker:
         (H, W) = image.shape[:2] 
         if not bounding_box:
             raise("No bounding box found, rerun object detection...")
+        if not self.tracker:
+            raise("Tracker not initialized...")
 
         (success, box) = self.tracker.update(image)
                 
