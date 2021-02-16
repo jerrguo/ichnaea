@@ -1080,8 +1080,6 @@ def draw_float_channel_on_image_array(image, channel, mask, alpha=0.9,
   pil_image = Image.composite(pil_colored_channel, pil_image, pil_mask)
   np.copyto(image, np.array(pil_image.convert('RGB')))
 
-SPORTS_BALL_ID = 37
-
 def visualize_boxes_and_labels_on_image_array(
     image,
     boxes,
@@ -1103,7 +1101,8 @@ def visualize_boxes_and_labels_on_image_array(
     skip_boxes=False,
     skip_scores=False,
     skip_labels=False,
-    skip_track_ids=False):
+    skip_track_ids=False,
+    whitelist_classes=None):
   """Overlay labeled boxes on an image with formatted scores and label names.
 
   This function groups boxes that correspond to the same location
@@ -1168,7 +1167,7 @@ def visualize_boxes_and_labels_on_image_array(
   for i in range(boxes.shape[0]):
     if max_boxes_to_draw == len(box_to_color_map):
       break
-    if classes[i] != SPORTS_BALL_ID:
+    if whitelist_classes and classes[i] not in whitelist_classes:
       continue
     if scores is None or scores[i] > min_score_thresh:
       box = tuple(boxes[i].tolist())
