@@ -37,7 +37,7 @@ void loop() {
 
 
   if(digitalRead(NANO_ENA) == HIGH){
-
+    Serial.print("test\n");
     // Get direction
     value = digitalRead(NANO_DIR);
     digitalWrite(STEP_DIR,value);
@@ -55,7 +55,23 @@ void loop() {
     delayMicroseconds(udelay);
     digitalWrite(STEP_PUL,LOW);
     delayMicroseconds(udelay);
-  }
 
+    
+    int ena = digitalRead(NANO_ENA);
+    int dir = digitalRead(NANO_DIR);
+    Serial.print("Speed: ");
+    int spd [] = {0, 0, 0, 0};
+    for (int x = 0; x < 4; x++){
+      spd[x] = digitalRead(NANO_SPEED[x]);
+      Serial.print(spd[x]);
+    }
+  
+    Serial.print(" ENA: ");
+    Serial.print(ena);
+    Serial.print(" DIR: ");
+    Serial.print(dir);
+    
+    Serial.print("\n");
+    }
 
 }
