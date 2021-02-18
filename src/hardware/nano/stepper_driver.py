@@ -13,7 +13,7 @@ def move_stepper(direction, duration_in_ms, speed):
     if not 0 <= speed <= 3:
         raise("Invalid Speed")
 
-    GPIO.setmod(GPIO.BOARD)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup([_DIR_PIN, _ENA_PIN], GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(_SPEED_PINS, GPIO.OUT, initial=GPIO.LOW)
 
