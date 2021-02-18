@@ -1,6 +1,10 @@
 import stepper_driver
 import time
 
+# stepper_driver.move_stepper(direction, time(ms), speed)
+# dir : 0, 1
+# speed: 0, 1, 2, 3
+
 stepper_driver.move_stepper(1, 3000, 2)
 
 time.sleep(2)
