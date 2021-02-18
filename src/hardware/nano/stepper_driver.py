@@ -1,9 +1,9 @@
 import time
 import RPi.GPIO as GPIO
 
-_DIR_PIN = 7
-_ENA_PIN = 6
-_SPEED_PINS = [8, 9, 10, 11]
+_DIR_PIN = 18
+_ENA_PIN = 19
+_SPEED_PINS = [21, 22, 23, 24]
 ###
 ### direction = 1 = forward
 ###
