@@ -7,16 +7,16 @@ _SPEED_PINS = [21, 22, 23, 24]
 ###
 ### direction = 1 = forward
 ###
-def move_stepper(direction, duration_in_ms, speed):
-    if direction != 1 or direction != 0:
-        raise("Invalid direction")
-    if not 0 <= speed <= 3:
-        raise("Invalid Speed")
+def move_stepper(direction, duration, speed):
+    if direction != 1 and direction != 0:
+        raise ValueError("Invalid direction")
+    if not 0 <= speed <= 4:
+        raise ValueError("Invalid Speed")
 
-    GPIO.setmod(GPIO.BOARD)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup([_DIR_PIN, _ENA_PIN], GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(_SPEED_PINS, GPIO.OUT, initial=GPIO.LOW)
-
+    
     ## set up speed data lines:
     for i in range(speed):
         GPIO.output(_SPEED_PINS[i], GPIO.HIGH)
@@ -28,7 +28,7 @@ def move_stepper(direction, duration_in_ms, speed):
     GPIO.output(_ENA_PIN, GPIO.HIGH)
 
     ## wait for required duration
-    time.sleep(duration_in_ms)
+    time.sleep(duration)
 
     ## finished and clean up
     GPIO.output(_ENA_PIN, GPIO.LOW)

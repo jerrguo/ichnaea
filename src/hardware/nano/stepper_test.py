@@ -1,12 +1,13 @@
 import stepper_driver
 import time
 
-stepper_driver.move_stepper(1, 3000, 2)
+stepper_driver.move_stepper(1, 3, 4)
+print("Done movement 1")
 
-time.sleep(2)
+time.sleep(1)
 
-stepper_driver.move_stepper(0, 3000, 2)
-
+stepper_driver.move_stepper(0, 3, 4)
+print("Done movement 2")
 
 #_DIR_PIN = 23
 #_ENA_PIN = 24
