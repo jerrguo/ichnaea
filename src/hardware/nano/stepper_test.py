@@ -1,8 +1,10 @@
 import stepper_driver
 import time
 
+
 stepper_driver.move_stepper(1, 3, 4)
 print("Done movement 1")
+
 
 time.sleep(1)
 
