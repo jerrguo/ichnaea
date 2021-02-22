@@ -11,10 +11,13 @@ HOME_PATH = pathlib.Path(__file__).parent.absolute().as_posix()
 PATH_TO_TEST_VIDEOS = os.path.join(HOME_PATH, 'test_videos')
 PATH_TO_VIDEO = os.path.join(PATH_TO_TEST_VIDEOS, 'test1.mp4')
 
+plz = 'nvarguscamerasrc sensor-id=0 ! video/x-raw(memory:NVMM), width=1920, height=1080, format=(string)NV12, framerate=21/1 ! nvvidconv flip-method=0 ! video/x-raw, width=960, height=616, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink wait-on-eos=false max-buffers=1 drop=True'
+
+
 if __name__ == '__main__':
     # Initialize OpenCV capture
     capture_index = PATH_TO_VIDEO
-    cap = cv2.VideoCapture(capture_index)
+    cap = cv2.VideoCapture(plz, cv2.CAP_GSTREAMER)
     if not cap.isOpened():
         cap.open(capture_index)
         if not cap.isOpened():
@@ -34,6 +37,7 @@ if __name__ == '__main__':
         with tf.compat.v1.Session(graph=detector.detection_graph) as sess:
             while True:
                 ret, image_np = cap.read()
+                print("New Image")
                 # If there is no bounding box, run the detection algorithm, otherwise track
                 if not BB:
                     boxes, scores, classes, num_detections = detector.detect_objects(sess, image_np)
