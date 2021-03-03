@@ -1,5 +1,4 @@
-"""trt_ssd_async.py
-
+"""
 Thread to read camera input
 Thread to drawing detection results / displaying video
 
@@ -195,7 +194,7 @@ def start_cam(args, sensor_id, shared, cls_dict, name):
     vis = BBoxVisualization(cls_dict)
 
     condition = threading.Condition()
-    trt_thread = TrtThread(condition, cam, args.model, shared, conf_th=0.1, GPU=0)
+    trt_thread = TrtThread(condition, cam, args.model, shared, conf_th=0.1, sensor=sensor_id, GPU=0)
     trt_thread.start()  # start the child thread
     loop_and_display(condition, vis, shared, args.detect, name)
     trt_thread.stop()   # stop the child thread
