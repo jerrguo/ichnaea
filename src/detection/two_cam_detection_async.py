@@ -25,7 +25,7 @@ from utils.visualization import BBoxVisualization
 # sudo systemctl restart nvargus-daemon
 
 
-DEBUG = True
+DEBUG = False
 WINDOW_NAME = 'Camera: {} Output'
 CONF_TH = 0.1
 MAIN_THREAD_TIMEOUT = 20.0  # 20 seconds
@@ -38,6 +38,28 @@ SUPPORTED_MODELS = [
     'ssd_inception_v2_coco',
     'ssdlite_mobilenet_v2_coco',
 ]
+
+
+
+def parse_args():
+    """Parse input arguments."""
+    desc = ('Capture and display live camera video, while doing '
+            'real-time object detection with TensorRT optimized '
+            'SSD model on Jetson Nano')
+    parser = argparse.ArgumentParser(description=desc)
+    parser = add_camera_args(parser) #TODO remove useless ones from here
+    parser.add_argument('-m', '--model', type=str,
+                        default='ssd_mobilenet_v1_coco',
+                        choices=SUPPORTED_MODELS)
+    parser.add_argument('-d', '--detect', action='append',
+                        help='-d sports ball -d fork')
+    parser.add_argument('-s0', '--sensor_0', action="store_const",
+                        const=0, help="Camera sensor 0")
+    parser.add_argument('-s1', '--sensor_1', action="store_const",
+                        const=1, help="Camera sensor 1")
+    args = parser.parse_args()
+    return args
+
 
 
 class SharedVariables:
@@ -61,10 +83,6 @@ class SharedVariables:
     def get(self):
         return self.img, self.boxes, self.confs, self.clss
 
-
-
-if __name__ == '__main__':
-    pass
 
 
 class DetectionThread(threading.Thread):
@@ -101,7 +119,7 @@ class DetectionThread(threading.Thread):
                 print("No new images found on sensor {}, ending thread.".format(self.cam.sensor_id))
                 break
 
-            boxes, confs, clss = self.trt_ssd.detect(img, CONF_TH)
+            boxes, confs, clss = trt_ssd.detect(img, CONF_TH)
             with self.condition:
                 self.shared.update(img, boxes, confs, clss)
                 self.condition.notify()
@@ -122,7 +140,7 @@ class DetectionThread(threading.Thread):
 class DetectionDriver():
 
 
-    def __init__(self, cams, shared_vars, filtered_clss):
+    def __init__(self, cams, shared_vars, filtered_clss, two_cams, model):
         
         self.two_cams = two_cams
 
@@ -143,12 +161,12 @@ class DetectionDriver():
 
         self.GPU = 0
         self.name = WINDOW_NAME.format(self.sensor_0)
+        
+        cuda.init()
         self.cuda_ctx = None # Created when thread starts
 
 
     def detect_driver(self):
-        
-        self.cuda_ctx = cuda.Device(self.GPU).make_contex()
 
         cam_threads = []
 
@@ -187,12 +205,13 @@ class DetectionDriver():
                 else:
                     raise SystemExit("Error: Timeout waiting for img")
 
-            img = vis.draw_bboxes(img, boxes, confs, clss, self.filtered_cls)
+            img = vis.draw_bboxes(img, boxes, confs, clss, self.filtered_clss)
             img = show_fps(img, fps)
             cv2.imshow(name, img)
 
             toc = time.time()
             fps = 1/(toc-tic)
+            tic = toc
 
             key = cv2.waitKey(1)
 
@@ -202,17 +221,54 @@ class DetectionDriver():
 
     def display_and_detect(self):
 
-        self.cuda_ctx = cuda.Device(self.GPU).make_contex()
+        self.cuda_ctx = cuda.Device(self.GPU).make_context()
 
         threads = self.detect_driver()
         self.display(self.cam_0, self.shared_0, self.condition_0)
-        [t.end for t in threads]
+        [t.end() for t in threads]
 
         self.cuda_ctx.pop()
 
 
 
+#TODO Filter classes in detect method
+if __name__ == '__main__':
+
+    args = parse_args()
+    args.onboard = True
+    args.do_resize = True
+    
+    cams = [Camera(args, sensor_id=0), Camera(args, sensor_id=1)]
+    shared_vars = [SharedVariables(), SharedVariables()]
+    filtered_clss = ["sports ball"]
+    two_cams = True
+
+    detection_driver = DetectionDriver(cams, shared_vars, filtered_clss, two_cams, args.model)
+    
+    detection_driver.display_and_detect()
+    
+    
 
 
 
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
