@@ -87,13 +87,12 @@ class SharedVariables:
 
 class DetectionThread(threading.Thread):
 
-    def __init__(self, cam, model, cuda_ctx, shared, condition, filtered_clss):
+    def __init__(self, cam, model, cuda_ctx, shared, condition):
         
         threading.Thread.__init__(self)
 
         self.cam = cam
 
-        self.filtered_clss = filtered_clss
         self.model = model
         self.cuda_ctx = cuda_ctx
         
@@ -120,6 +119,7 @@ class DetectionThread(threading.Thread):
                 break
 
             boxes, confs, clss = trt_ssd.detect(img, CONF_TH)
+            
             with self.condition:
                 self.shared.update(img, boxes, confs, clss)
                 self.condition.notify()
@@ -131,6 +131,8 @@ class DetectionThread(threading.Thread):
                 frame_count += 1
                 print("Sensor {} -> FPS: {} || BB Found % {}"
                     .format(self.cam.sensor_id, 1/(toc-tic), 100*BB_count/frame_count))
+                    
+                print("Sensor {} -> ".format(self.cam.sensor_id), boxes, confs, clss)
 
             tic = toc
 
@@ -140,7 +142,7 @@ class DetectionThread(threading.Thread):
 class DetectionDriver():
 
 
-    def __init__(self, cams, shared_vars, filtered_clss, two_cams, model):
+    def __init__(self, cams, shared_vars, two_cams, model):
         
         self.two_cams = two_cams
 
@@ -151,7 +153,6 @@ class DetectionDriver():
 
         self.model = model
         self.conf_th = CONF_TH
-        self.filtered_clss = filtered_clss
         
         if two_cams:
             self.cam_1 = cams[1]
@@ -171,12 +172,12 @@ class DetectionDriver():
         cam_threads = []
 
         cam_0_detector = DetectionThread(self.cam_0, self.model, self.cuda_ctx, 
-                                            self.shared_0, self.condition_0, self.filtered_clss)
+                                            self.shared_0, self.condition_0)
         cam_threads.append(cam_0_detector)
 
         if self.two_cams:
             cam_1_detector = DetectionThread(self.cam_1, self.model, self.cuda_ctx,
-                                             self.shared_1, self.condition_1, self.filtered_clss)
+                                             self.shared_1, self.condition_1)
             cam_threads.append(cam_1_detector)
 
         [t.start() for t in cam_threads]
@@ -205,7 +206,7 @@ class DetectionDriver():
                 else:
                     raise SystemExit("Error: Timeout waiting for img")
 
-            img = vis.draw_bboxes(img, boxes, confs, clss, self.filtered_clss)
+            img = vis.draw_bboxes(img, boxes, confs, clss)
             img = show_fps(img, fps)
             cv2.imshow(name, img)
 
@@ -240,10 +241,9 @@ if __name__ == '__main__':
     
     cams = [Camera(args, sensor_id=0), Camera(args, sensor_id=1)]
     shared_vars = [SharedVariables(), SharedVariables()]
-    filtered_clss = ["sports ball"]
     two_cams = True
 
-    detection_driver = DetectionDriver(cams, shared_vars, filtered_clss, two_cams, args.model)
+    detection_driver = DetectionDriver(cams, shared_vars, two_cams, args.model)
     
     detection_driver.display_and_detect()
     
