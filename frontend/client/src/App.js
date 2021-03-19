@@ -6,6 +6,8 @@ import StreamEdit from "./components/streams/StreamEdit";
 import StreamShow from "./components/streams/StreamShow";
 import StreamDelete from "./components/streams/StreamDelete";
 import StreamList from "./components/streams/StreamList";
+import VodList from "./components/VodList";
+import VodShow from "./components/VodShow";
 import Header from "./components/Header";
 import { Container } from "semantic-ui-react";
 import history from './history'
@@ -16,6 +18,8 @@ function App() {
         <Header />
         <Switch>
           <Route path="/" exact component={StreamList} />
+          <Route path="/vods" exact component={VodList} />
+          <Route path="/vods/:id" exact component={VodShow} />
           <Route path="/streams/new" exact component={StreamCreate} />
           <Route path="/streams/edit/:id" exact component={StreamEdit} />
           <Route path="/streams/delete/:id" exact component={StreamDelete} />

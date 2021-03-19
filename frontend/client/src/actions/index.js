@@ -1,5 +1,6 @@
 import ACTIONS from './constants';
 import streams from '../apis/streams';
+import vods from '../apis/vods';
 import history from './../history';
 
 export const signIn = (userId) => {
@@ -13,6 +14,26 @@ export const signOut = () => {
     return {
         type: ACTIONS.SIGN_OUT
     };
+}
+
+export const fetchVods = () => {
+    return async (dispatch) => {
+        const response = await vods.get('/vods');
+        dispatch({
+            type: ACTIONS.FETCH_VODS,
+            payload: response.data
+        })
+    }
+}
+
+export const fetchVod = (id) => {
+    return async (dispatch) => {
+        const response = await streams.get(`/vods/${id}`);
+        dispatch({
+            type: ACTIONS.FETCH_VOD,
+            payload: response.data
+        })
+    }
 }
 
 export const createStream = (formValues) => {

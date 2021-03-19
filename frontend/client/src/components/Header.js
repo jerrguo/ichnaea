@@ -2,6 +2,7 @@ import React from "react";
 import { Menu } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import GoogleAuth from "./GoogleAuth";
+import VodList from "./VodList";
 
 const Header = () => {
   return (
@@ -14,6 +15,8 @@ const Header = () => {
           <Link to="/">All Streams</Link>
         </Menu.Item>
         <GoogleAuth />
+        <Menu.Item />
+         <Link to="/vods"> Vods </Link>
       </Menu.Menu>
     </Menu>
   );
